@@ -4,13 +4,9 @@
 #include "camera.h"
 #include "sphere.h"
 #include "imageplane.h"
+#include "scenecolour.h"
 
 using namespace OpenGP;
-
-using Colour = Vec3; // RGB Value
-Colour white() { return Colour(256.0f, 256.0f, 256.0f); }
-Colour black() { return Colour(0.0f, 0.0f, 0.0f); }
-Colour grey() { return Colour(69.0f, 69.0f, 69.0f); }
 
 uchar BoundPixelValue(int shading)
 {
@@ -46,7 +42,7 @@ int main(int, char**){
     float zSphereDistance = -3.0f;
 
     // Define Anti-Aliasing factor
-    int aaFactor = 1;
+    int aaFactor = 5;
 
     // Define camera origin
     Vec3 origin = Vec3(xOrigin, yOrigin, zOrigin);
@@ -65,18 +61,19 @@ int main(int, char**){
 
     // Define lighting source ambient and diffuse colors
     Vec3 lightingSource = Vec3(-5.0f, 10.0f, 0.0f);
-    Colour ambient(7, 70, 70);
-    Colour diffuse(15, 130, 130);
+    SceneColour sceneColour = SceneColour();
+    sceneColour.setAmbient(Vec3(7.0f, 70.0f, 70.0f));
+    sceneColour.setDiffuse(Vec3(15.0f, 130.0f, 130.0f));
 
     // Define Image to write to bmp file
-    Image<Colour> imageWriter(hResolution, wResolution);
+    Image<Vec3> imageWriter(hResolution, wResolution);
 
     // Ray Tracing
     for (int row = 0; row < hResolution; ++row) {
         for (int col = 0; col < wResolution; ++col) {
 
-            // Define new colour
-            Colour newColour(0.0f, 0.0f, 0.0f);
+            // Define base colour
+            SceneColour pixelColour = SceneColour(0.0f, 0.0f, 0.0f);
 
             // Anti-Aliasing via random rays
             for (int alias = 0; alias < aaFactor; alias++) {
@@ -104,19 +101,18 @@ int main(int, char**){
                     }
 
                     // Calculate diffuse and ambient values
-                    Colour colour(0.0f, 0.0f, 0.0f);
                     float diffuseTerm = cosAngle;
 
                     // Adjust colours and scale to [0.0, 1.0]
-                    float r = static_cast<float>(ambient[0] + diffuse[0] * diffuseTerm);
+                    float r = static_cast<float>(sceneColour.getAmbient()[0] + sceneColour.getDiffuse()[0] * diffuseTerm);
                     int tempR = BoundPixelValue(static_cast<int>(r));
-                    float g = static_cast<float>(ambient[1] + diffuse[1] * diffuseTerm);
+                    float g = static_cast<float>(sceneColour.getAmbient()[1] + sceneColour.getDiffuse()[1] * diffuseTerm);
                     int tempG = BoundPixelValue(static_cast<int>(g));
-                    float b = static_cast<float>(ambient[2] + diffuse[2] * diffuseTerm);
+                    float b = static_cast<float>(sceneColour.getAmbient()[2] + sceneColour.getDiffuse()[2] * diffuseTerm);
                     int tempB = BoundPixelValue(static_cast<int>(b));
 
                     // Write colour to image with diffuse factors
-                    newColour += Vec3(tempR, tempG, tempB);
+                    pixelColour.updateColour(Vec3(tempR, tempG, tempB));
 
                 } else {
 
@@ -134,20 +130,21 @@ int main(int, char**){
 
                         // Print floor or shadow, depending on intersection
                         if (dShadow > 0.0f) {
-                            newColour += Colour(0.0f, 0.0f, 0.0f);
+                            pixelColour.updateColour(Vec3(sceneColour.black()));
                         } else {
-                            newColour += grey();
+                            pixelColour.updateColour(Vec3(sceneColour.grey()));
                         }
                     } else {
-                        newColour += white();
+                        pixelColour.updateColour(Vec3(sceneColour.white()));
                     }
 
                 }
             }
 
             // Scale RGB values output
-            newColour /= (static_cast<float>(aaFactor) * 256.0f);
-            imageWriter(row, col) = newColour;
+            Vec3 currPixel = pixelColour.getColour();
+            currPixel /= (static_cast<float>(aaFactor) * 256.0f);
+            imageWriter(row, col) = currPixel;
         }
     }
 
@@ -173,72 +170,3 @@ int main(int, char**){
  *
 */
 
-/*
-
-    // Add Triangles onto the scene
-    //Vec3 p1LeftFloor = Vec3(-0.5, 0, -10);
-    //Vec3 p2LeftFloor = Vec3(-0.5, 0.5, -10);
-    //Vec3 p3LeftFloor = Vec3(0.5, 0.5, -10);
-    Vec3 p1LeftFloor = Vec3(-sphereRadius, -sphereRadius, -1);
-    Vec3 p2LeftFloor = Vec3(-sphereRadius, -sphereRadius, -9);
-    Vec3 p3LeftFloor = Vec3(sphereRadius, -sphereRadius, -9);
-
-    Vec3 p1RightFloor = Vec3(-4, -4, -1);
-    Vec3 p2RightFloor = Vec3(4, -4, -9);
-    Vec3 p3RightFloor = Vec3(4, -4, -1);
-
-
-            Vec3 pointIntersection = origin + t*(ray);
-            Vec3 C; // vector perpendicular to triangle's plane
-                // Calculate Ray-Triangle Intersection
-
-                // Find Normal of Plane
-                Vec3 planeNormal = Vec3(0, 1, 0);
-
-                Vec3 p1p2FloorLeft = p2LeftFloor - p1LeftFloor;
-                Vec3 p1p3FloorLeft = p3LeftFloor - p1LeftFloor;
-                Vec3 normalFloorLeft = p1p2FloorLeft.cross(p1p3FloorLeft);
-                float areaFloorLeft = normalFloorLeft.dot(normalFloorLeft);
-
-                // Check if Plane and Ray are parallel
-
-
-                // Find distance to
-                float dist = normalFloorLeft.dot(p1LeftFloor);
-
-                // Solve for t
-                float t = (normalFloorLeft.dot(origin) + dist) / normalFloorLeft.dot(ray);
-
-
-
-                    // -----------
-                    // edge 0
-                    Vec3 p1p2Edge = p2LeftFloor - p1LeftFloor;
-                    Vec3 p1IntPoint = pointIntersection - p1LeftFloor;
-                    C = p1p2Edge.cross(p1IntPoint);
-                    if (normalFloorLeft.dot(C) < 0) {
-                        //imageWriter(row, col) = white();
-                        flag = true;
-                    }
-
-                    if (!flag) {
-                    // edge 0
-                        Vec3 p2p3Edge = p3LeftFloor - p2LeftFloor;
-                        Vec3 p2IntPoint = pointIntersection - p2LeftFloor;
-                        C = p2p3Edge.cross(p2IntPoint);
-                        if (normalFloorLeft.dot(C) < 0) {
-                            //imageWriter(row, col) = white();
-                        }
-                    }
-
-                    if (!flag) {
-                    // edge 0
-                        Vec3 p3p1Edge = p1LeftFloor - p3LeftFloor;
-                        Vec3 p3IntPoint = pointIntersection - p3LeftFloor;
-                        C = p3p1Edge.cross(p3IntPoint);
-                        if (normalFloorLeft.dot(C) < 0) {
-                            //imageWriter(row, col) = white();
-                        }
-                    }
-                    // -------------
-*/
