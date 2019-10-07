@@ -13,7 +13,6 @@ ImagePlane::ImagePlane(float cols, float rows, Vec3 lowerLeft, Vec3 upperRight)
 
 ImagePlane::~ImagePlane(){}
 
-
 Vec3 ImagePlane::generatePixelPos(float row, float col)
 {
     // Choose field of view

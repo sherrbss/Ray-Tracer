@@ -5,6 +5,12 @@
 
 using namespace OpenGP;
 
+// Encapsulates information and functions pertaining to spheres
+// that are projected onto a given scene. Information includes
+// the center of the sphere, as a Vec3 object, as well as the
+// raduis of the sphere, as a float. Functions include
+// intersectRay, which finds whether an intersection exists.
+//
 class sphere
 {
 public:
@@ -13,8 +19,13 @@ public:
     sphere(Vec3 sphereCenter, float sphereRadius);
     ~sphere();
 
-    // A function to check if the ray intersects with the sphere
-    // make inline by declaring/initializing in header file
+    // Returns a float that signifies whether a solution exists
+    // between a ray and a sphere, taking two parameters,
+    // direction and origin, both Vec3 objects. The function
+    // returns -1 where no solutions are found or if the solution
+    // found is on the dark side of the sphere. If a solution
+    // is found on the bright side of the circle, the greater of the
+    //two solutions is returned.
     float intersectRay(Vec3 const& direction, Vec3 const& origin);
 
 private:
@@ -22,4 +33,4 @@ private:
     float mRadius_;
 };
 
-#endif // SPHERE_H
+#endif

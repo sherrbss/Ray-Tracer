@@ -1,6 +1,5 @@
 #include "OpenGP/Image/Image.h"
 #include "bmpwrite.h"
-
 #include <iostream>
 #include "camera.h"
 #include "sphere.h"
@@ -9,11 +8,8 @@
 using namespace OpenGP;
 
 using Colour = Vec3; // RGB Value
-Colour red() { return Colour(1.0f, 0.0f, 0.0f); }
-//Colour white() { return Colour(1.0f, 1.0f, 1.0f); }
 Colour white() { return Colour(256.0f, 256.0f, 256.0f); }
 Colour black() { return Colour(0.0f, 0.0f, 0.0f); }
-//Colour grey() { return Colour(69.0f/256.0f, 69.0f/256.0f, 69.0f/174.0f); }
 Colour grey() { return Colour(69.0f, 69.0f, 69.0f); }
 
 uchar BoundPixelValue(int shading)
@@ -25,53 +21,52 @@ uchar BoundPixelValue(int shading)
 
 int main(int, char**){
 
-    // Initialize resolution of image
+    // Define resolution of image
     int wResolution = 640;
     int hResolution = 480;
-
-    // Define Anti-Aliasing factor
-    int aaFactor = 1;
 
     // Define camera position & origin
     float xOrigin = 0.0f;
     float yOrigin = 0.0f;
     float zOrigin = 2.0f;
-    Vec3 origin = Vec3(xOrigin, yOrigin, zOrigin);
-    camera cam = camera(origin);
 
-    // Adjust for Camera Space
-    float adjustedImageBottom = -1;
-    float adjustedImageTop = 1;
-    float adjustedImageLeft = -1;
-    float adjustedImageRight = 1;
+    // Define viewing angle (-Z)
+    float zImage = -1.0f;
+
+    // Define coordinates of Image Plane
+    float imageBottom = -1;
+    float imageTop = 1;
+    float imageLeft = -1;
+    float imageRight = 1;
 
     // Intialize sphere position and dimensions
-    // FIXME: Issue with stretched sphere on reposition
     float sphereRadius = 1.0f;
     float xSphereOffset = 0.0f;
     float ySphereOffset = 0.0f;
     float zSphereDistance = -3.0f;
-    Vec3 sphereCenter = Vec3(xSphereOffset, ySphereOffset, zSphereDistance);
 
-    // Initialize viewing angle (-Z)
-    float zImage = -1.0f;
-    //float zImage = yOrigin + zSphereDistance - sphereRadius;
+    // Define Anti-Aliasing factor
+    int aaFactor = 1;
 
-    // Define lighting source ambient and diffuse colors
-    Vec3 lightingSource = Vec3(-5.0f, 10.0f, 0.0f);
-
-    Colour ambient(7, 70, 70);
-    Colour diffuse(15, 130, 130);
+    // Define camera origin
+    Vec3 origin = Vec3(xOrigin, yOrigin, zOrigin);
+    camera cam = camera(origin);
 
     // Initialize lower left and upper right corner vectors
-    Vec3 lowerLeft = Vec3(adjustedImageLeft, adjustedImageBottom, zImage);
-    Vec3 upperRight = Vec3(adjustedImageRight, adjustedImageTop, zImage);
+    Vec3 lowerLeft = Vec3(imageLeft, imageBottom, zImage);
+    Vec3 upperRight = Vec3(imageRight, imageTop, zImage);
 
     // Build the image plane
     ImagePlane image = ImagePlane(wResolution, hResolution, lowerLeft, upperRight);
 
-    // Add Spheres onto the scene
+    // Add items onto the scene
+    Vec3 sphereCenter = Vec3(xSphereOffset, ySphereOffset, zSphereDistance);
     sphere sphereImage = sphere(sphereCenter, sphereRadius);
+
+    // Define lighting source ambient and diffuse colors
+    Vec3 lightingSource = Vec3(-5.0f, 10.0f, 0.0f);
+    Colour ambient(7, 70, 70);
+    Colour diffuse(15, 130, 130);
 
     // Define Image to write to bmp file
     Image<Colour> imageWriter(hResolution, wResolution);
@@ -139,21 +134,18 @@ int main(int, char**){
 
                         // Print floor or shadow, depending on intersection
                         if (dShadow > 0.0f) {
-                            //imageWriter(row, col) = Colour(0.0f, 0.0f, 0.0f);
                             newColour += Colour(0.0f, 0.0f, 0.0f);
                         } else {
-                            //imageWriter(row, col) = grey();
                             newColour += grey();
                         }
                     } else {
-                        //imageWriter(row, col) = white();
                         newColour += white();
                     }
 
                 }
             }
 
-            // Average RGB values and scale
+            // Scale RGB values output
             newColour /= (static_cast<float>(aaFactor) * 256.0f);
             imageWriter(row, col) = newColour;
         }
@@ -165,6 +157,21 @@ int main(int, char**){
 
     return EXIT_SUCCESS;
 }
+
+/*
+ * 1. Adjust camera/coordinate system (+10%)---
+ *      - allows for the camera to be moved
+ * 2. Add plane class
+ *      - intersection function
+ * 3. Create colour class with calculations for
+ *      - diffuse function
+ *      - shadow funciton
+ * 4. Add and touch up comments/cleanup code (+10%)---
+ *      - functions/inline comments (+5%)
+ *      - clean code (+5%)
+ * 5.1 Add reflective material (+5%)
+ *
+*/
 
 /*
 

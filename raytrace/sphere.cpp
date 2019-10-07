@@ -1,5 +1,4 @@
 #include "sphere.h"
-#include "camera.h"
 
 sphere::sphere(){}
 
@@ -35,12 +34,8 @@ float sphere::intersectRay(Vec3 const& direction, Vec3 const& origin)
     // Return where both solutions are on the dark side of the circle
     if (solA < 0.0f && solB < 0.0f) {
         return -1.0f;
-        //return -0.5f;
     }
 
     // Return the greater of solution A and B
     return (solA > solB) ? solB : solA;
 }
-
-
-
