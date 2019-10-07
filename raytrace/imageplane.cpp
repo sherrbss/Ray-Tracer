@@ -15,6 +15,29 @@ ImagePlane::~ImagePlane(){}
 
 Vec3 ImagePlane::generatePixelPos(float row, float col)
 {
+    /*
+    Vec3 origin = Vec3(0.0f, 0.0f, 2.0f);
+    Vec3 lookat = Vec3(0.0f, 0.0f, -1.0f);
+    Vec3 vup = Vec3(0.0f, 1.0f, 0.0f);
+    float aspectRatio = xCols_ / yRows_;
+    //float fov = 90.0f;
+
+    Vec3 x, y, z;
+    float halfHeight = 0.5f;
+    float halfWidth = halfHeight * aspectRatio;
+    z = (origin - lookat).normalized();
+    x = (vup.cross(z)).normalized();
+    y = z.cross(x);
+
+    Vec3 ll = Vec3(-halfWidth, -halfHeight, -1.0f);
+    ll = origin - (halfWidth * x) - (halfHeight * y) - z;
+    Vec3 horizontal = 2.0f * halfWidth * x;
+    Vec3 vertical = 2.0f * halfHeight * y;
+
+    Vec3 temp = ll + (row + randU) * horizontal + (col + randV) * vertical - origin;
+    return temp - origin;
+    */
+
     // Choose field of view
     float fov = 90.0f;
 

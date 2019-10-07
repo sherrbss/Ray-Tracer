@@ -15,6 +15,17 @@ uchar BoundPixelValue(int shading)
     return shading;
 }
 
+float ClampAngle(float angle)
+{
+    if (angle < 0.0f) {
+        return 0.0f;
+    }
+    if (angle > 1.0f) {
+        return 1.0f;
+    }
+    return angle;
+}
+
 int main(int, char**){
 
     // Define resolution of image
@@ -42,7 +53,7 @@ int main(int, char**){
     float zSphereDistance = -3.0f;
 
     // Define Anti-Aliasing factor
-    int aaFactor = 5;
+    int aaFactor = 1;
 
     // Define camera origin
     Vec3 origin = Vec3(xOrigin, yOrigin, zOrigin);
@@ -55,15 +66,27 @@ int main(int, char**){
     // Build the image plane
     ImagePlane image = ImagePlane(wResolution, hResolution, lowerLeft, upperRight);
 
-    // Add items onto the scene
+    // Add sphere onto the scene and define ambient/diffuse values
     Vec3 sphereCenter = Vec3(xSphereOffset, ySphereOffset, zSphereDistance);
     sphere sphereImage = sphere(sphereCenter, sphereRadius);
+    SceneColour sphereColour = SceneColour();
+    sphereColour.setAmbient(Vec3(7.0f, 70.0f, 70.0f));
+    sphereColour.setDiffuse(Vec3(15.0f, 130.0f, 130.0f));
 
-    // Define lighting source ambient and diffuse colors
-    Vec3 lightingSource = Vec3(-5.0f, 10.0f, 0.0f);
+    // Add sphere onto the scene and define ambient/diffuse values
+    SceneColour planeColour = SceneColour();
+    planeColour.setAmbient(Vec3(0.0f, 0.0f, 0.0f));
+    planeColour.setDiffuse(Vec3(69.0f, 69.0f, 69.0f));
+    planeColour.updateColour(Vec3(69.0f, 69.0f, 69.0f));
+
+    // Add generic scene colours
     SceneColour sceneColour = SceneColour();
-    sceneColour.setAmbient(Vec3(7.0f, 70.0f, 70.0f));
-    sceneColour.setDiffuse(Vec3(15.0f, 130.0f, 130.0f));
+    sceneColour.setAmbient(Vec3(0.0f, 0.0f, 0.0f));
+    sceneColour.setDiffuse(Vec3(255.0f, 255.0f, 255.0f));
+    sceneColour.updateColour(Vec3(255.0f, 255.0f, 255.0f));
+
+    // Define lighting source
+    Vec3 lightingSource = Vec3(-5.0f, 10.0f, -1.0f);
 
     // Define Image to write to bmp file
     Image<Vec3> imageWriter(hResolution, wResolution);
@@ -88,31 +111,18 @@ int main(int, char**){
 
                     // Calculate diffuse coefficient and clamp
                     Vec3 spherePoint = origin + t * ray;
-                    Vec3 normal = (spherePoint - sphereCenter).normalized();
-                    Vec3 lightVector = (lightingSource - spherePoint).normalized();
-                    float cosAngle = (normal.dot(lightVector));
-
-                    // Clamp angle
-                    if (cosAngle < 0.0f) {
-                        cosAngle = 0.0f;
-                    }
-                    if (cosAngle > 1.0f) {
-                        cosAngle = 1.0f;
-                    }
+                    float cosAngle = ClampAngle(sceneColour.diffuseCoefficient(spherePoint, sphereCenter, lightingSource));
 
                     // Calculate diffuse and ambient values
                     float diffuseTerm = cosAngle;
 
-                    // Adjust colours and scale to [0.0, 1.0]
-                    float r = static_cast<float>(sceneColour.getAmbient()[0] + sceneColour.getDiffuse()[0] * diffuseTerm);
-                    int tempR = BoundPixelValue(static_cast<int>(r));
-                    float g = static_cast<float>(sceneColour.getAmbient()[1] + sceneColour.getDiffuse()[1] * diffuseTerm);
-                    int tempG = BoundPixelValue(static_cast<int>(g));
-                    float b = static_cast<float>(sceneColour.getAmbient()[2] + sceneColour.getDiffuse()[2] * diffuseTerm);
-                    int tempB = BoundPixelValue(static_cast<int>(b));
-
                     // Write colour to image with diffuse factors
-                    pixelColour.updateColour(Vec3(tempR, tempG, tempB));
+                    Vec3 currentColour = sceneColour.calculateRGB(
+                                sphereColour.getAmbient(),
+                                sphereColour.getDiffuse(),
+                                diffuseTerm);
+
+                    pixelColour.updateColour(currentColour);
 
                 } else {
 
@@ -125,19 +135,31 @@ int main(int, char**){
                             && planePoint(2) < -1.0f && planePoint(2) > -19.0f) {
 
                         // Generate ray and test for intersection with sphere
-                        Vec3 lightVector = (lightingSource - planePoint);
+                        Vec3 lightVector = (lightingSource - planePoint).normalized();
                         float dShadow = sphereImage.intersectRay(lightVector, planePoint);
 
                         // Print floor or shadow, depending on intersection
                         if (dShadow > 0.0f) {
-                            pixelColour.updateColour(Vec3(sceneColour.black()));
-                        } else {
-                            pixelColour.updateColour(Vec3(sceneColour.grey()));
-                        }
-                    } else {
-                        pixelColour.updateColour(Vec3(sceneColour.white()));
-                    }
+                            Vec3 normal = Vec3(0.0f, 1.0f, 0.0f);
+                            float cosAngle = ClampAngle(sceneColour.diffuseCoefficient(planePoint, normal, lightingSource));
 
+                            // Calculate diffuse and ambient values
+                            float diffuseTerm = -cosAngle;
+
+                            Vec3 currentColour = sceneColour.calculateRGB(
+                                        planeColour.getAmbient(),
+                                        planeColour.getDiffuse(),
+                                        diffuseTerm);
+
+                            pixelColour.updateColour(currentColour);
+
+                        } else {
+                            pixelColour.updateColour(Vec3(planeColour.getColour()));
+                        }
+
+                    } else {
+                        pixelColour.updateColour(Vec3(sceneColour.getColour()));
+                    }
                 }
             }
 
@@ -167,6 +189,7 @@ int main(int, char**){
  *      - functions/inline comments (+5%)
  *      - clean code (+5%)
  * 5.1 Add reflective material (+5%)
+ * Line lengths
  *
 */
 

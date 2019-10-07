@@ -28,6 +28,7 @@ public:
     //two solutions is returned.
     float intersectRay(Vec3 const& direction, Vec3 const& origin);
 
+
 private:
     Vec3 mCenter_;
     float mRadius_;

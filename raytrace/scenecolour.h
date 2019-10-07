@@ -39,8 +39,17 @@ public:
     // Sets the diffuse colour
     void setDiffuse(Vec3 diffuse);
 
-    // Updates the current colour for use in Anti-Aliasing
-    Vec3 updateColour(Vec3 toAdd);
+    // Sets the current colour for use in Anti-Aliasing
+    void updateColour(Vec3 toAdd);
+
+    // Returns the diffuse coefficient
+    float diffuseCoefficient(Vec3 intPoint, Vec3 normalEndpoint, Vec3 lightingSource);
+
+    // Returns uchar if shading values are outside of the range
+    uchar boundPixelValue(int shading);
+
+    // Returns RGB of current pixel
+    Vec3 calculateRGB(Vec3 ambient, Vec3 diffuse, float diffuseTerm);
 
 private:
     Vec3 currentColor, ambientColour, diffuseColour;
