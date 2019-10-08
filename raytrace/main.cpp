@@ -48,7 +48,7 @@ int main(int, char**){
 
     // Add sphere onto the scene and define ambient/diffuse values
     Colour planeColour = Colour();
-    planeColour.setAmbient(Vec3(0.0f, 0.0f, 0.0f));
+    planeColour.setAmbient(Vec3(10.0f, 10.0f, 10.0f));
     planeColour.setDiffuse(Vec3(69.0f, 69.0f, 69.0f));
     planeColour.updateColour(Vec3(69.0f, 69.0f, 69.0f));
 
@@ -107,6 +107,7 @@ int main(int, char**){
                             && planePoint(2) < -8.0f && planePoint(2) > -20.0f) {
 
                         // Generate ray and test for intersection with sphere
+                        Ray normal = Ray(Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f));
                         Ray lightRay = Ray(planePoint, lightingSource);
                         float tShadow = sphereImage.intersectRay(lightRay);
 
@@ -114,7 +115,6 @@ int main(int, char**){
                         if (tShadow > 0.0f) {
 
                             // Calculate diffuse and ambient values
-                            Ray normal = Ray(Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f));
                             float diffuseTerm = sceneColour.diffuseCoefficient(
                                         lightRay, normal);
 
@@ -127,15 +127,33 @@ int main(int, char**){
 
                         } else {
 
-                            // Add checkerboard
 
-                            pixelColour.updateColour(Vec3(planeColour.getColour()));
+                            // Add checkerboard shading
+                            int scale;
+                            bool x = (int)((planePoint(0) + scale)) % 2 == 0;
+                            bool y = (int)((planePoint(1) + scale)) % 2 == 0;
+                            bool z = (int)((planePoint(2) + scale)) % 2 == 0;
+
+                            Vec3 tempCol;
+
+                            if (x ^ y ^ z) {
+                                tempCol = planeColour.black();
+                            } else {
+                                tempCol = planeColour.white();
+                            }
+
+                            // Add checkerboard
+                            float diffuseTerm = sceneColour.diffuseCoefficient(
+                                        lightRay, normal);
+
+                            //pixelColour.updateColour(Vec3(planeColour.getColour()));
+                            pixelColour.updateColour(tempCol);
                         }
 
                     } else {
                         Vec3 currRayVector = currRay.getDirection().normalized();
                         float t = 0.5f * (currRayVector(1) + 1.0f);
-                        Vec3 tempCol = ((1.0f - t) * sphereColour.getDiffuse()) + (t * sceneColour.white());
+                        Vec3 tempCol = ((1.0f - t) * sphereColour.white()) + (t * sceneColour.black());
                         pixelColour.updateColour(Vec3(tempCol));
                     }
                 }
