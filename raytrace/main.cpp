@@ -32,7 +32,7 @@ int main(int, char**){
     float zSphereDistance = -14.0f;
 
     // Define Anti-Aliasing factor
-    int aaFactor = 1;
+    int aaFactor = 5;
 
     // Add sphere onto the scene and define ambient/diffuse values
     Vec3 sphereCenter = Vec3(xSphereOffset, ySphereOffset, zSphereDistance);
@@ -128,8 +128,9 @@ int main(int, char**){
                         } else {
 
 
+
                             // Add checkerboard shading
-                            int scale;
+                            int scale = 1111111;
                             bool x = (int)((planePoint(0) + scale)) % 2 == 0;
                             bool y = (int)((planePoint(1) + scale)) % 2 == 0;
                             bool z = (int)((planePoint(2) + scale)) % 2 == 0;
@@ -137,16 +138,11 @@ int main(int, char**){
                             Vec3 tempCol;
 
                             if (x ^ y ^ z) {
-                                tempCol = planeColour.black();
-                            } else {
                                 tempCol = planeColour.white();
+                            } else {
+                                tempCol = planeColour.black();
                             }
 
-                            // Add checkerboard
-                            float diffuseTerm = sceneColour.diffuseCoefficient(
-                                        lightRay, normal);
-
-                            //pixelColour.updateColour(Vec3(planeColour.getColour()));
                             pixelColour.updateColour(tempCol);
                         }
 
