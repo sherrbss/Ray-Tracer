@@ -1,19 +1,20 @@
 #ifndef SCENECOLOUR_H
 #define SCENECOLOUR_H
 #include "OpenGP/Image/Image.h"
+#include "ray.h"
 
 using namespace OpenGP;
 
 // Encapsulates information and functions pertaining to output colors
 // of each area on the scene.
-class SceneColour
+class Colour
 {
 public:
 
     // Constructors & Destructor
-    SceneColour();
-    SceneColour(float x, float y, float z);
-    ~SceneColour();
+    Colour();
+    Colour(float x, float y, float z);
+    ~Colour();
 
     // Return white as an Vec3 object with RBG with values [0, 255]
     Vec3 white();
@@ -42,10 +43,10 @@ public:
     // Sets the current colour for use in Anti-Aliasing
     void updateColour(Vec3 toAdd);
 
-    // Returns the diffuse coefficient
-    float diffuseCoefficient(Vec3 intPoint, Vec3 normalEndpoint, Vec3 lightingSource);
+    // Returns the clamped diffuse coefficient
+    float diffuseCoefficient(Ray sphereNormal, Ray lightRay);
 
-    // Returns uchar if shading values are outside of the range
+    // Returns clamped value for shading values outside of the RGB range
     uchar boundPixelValue(int shading);
 
     // Returns RGB of current pixel

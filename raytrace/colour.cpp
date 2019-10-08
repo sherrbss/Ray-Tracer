@@ -1,81 +1,88 @@
-#include "scenecolour.h"
+#include "colour.h"
 
-SceneColour::SceneColour()
+Colour::Colour()
 {
     Color(0.0f, 0.0f, 0.0f);
 }
 
-SceneColour::SceneColour(float x, float y, float z)
+Colour::Colour(float x, float y, float z)
 {
     currentColor = Vec3(x, y, z);
 }
 
-SceneColour::~SceneColour(){}
+Colour::~Colour(){}
 
-Vec3 SceneColour::white()
+Vec3 Colour::white()
 {
     return Vec3(256.0f, 256.0f, 256.0f);
 }
 
-Vec3 SceneColour::black()
+Vec3 Colour::black()
 {
     return Vec3(0.0f, 0.0f, 0.0f);
 }
 
-Vec3 SceneColour::grey()
+Vec3 Colour::grey()
 {
     return Vec3(69.0f, 69.0f, 69.0f);
 }
 
-Vec3 SceneColour::getColour()
+Vec3 Colour::getColour()
 {
     return currentColor;
 }
 
-Vec3 SceneColour::getAmbient()
+Vec3 Colour::getAmbient()
 {
     return ambientColour;
 }
 
-Vec3 SceneColour::getDiffuse()
+Vec3 Colour::getDiffuse()
 {
     return diffuseColour;
 }
 
-void SceneColour::setAmbient(Vec3 ambient)
+void Colour::setAmbient(Vec3 ambient)
 {
     ambientColour = ambient;
 }
 
-void SceneColour::setDiffuse(Vec3 diffuse)
+void Colour::setDiffuse(Vec3 diffuse)
 {
     diffuseColour = diffuse;
 }
 
-void SceneColour::updateColour(Vec3 toAdd)
+void Colour::updateColour(Vec3 toAdd)
 {
     currentColor += toAdd;
 }
 
-float SceneColour::diffuseCoefficient(Vec3 intPoint, Vec3 normalEndpoint, Vec3 lightingSource)
+float Colour::diffuseCoefficient(Ray sphereNormal, Ray lightRay)
 {
     float cosAngle;
 
-    Vec3 normal = (intPoint - normalEndpoint).normalized();
-    Vec3 lightVector = (lightingSource - intPoint).normalized();
+    Vec3 normal = (sphereNormal.getDirection() - sphereNormal.getOrigin()).normalized();
+    Vec3 lightVector = (lightRay.getOrigin() - sphereNormal.getDirection()).normalized();
     cosAngle = (normal.dot(lightVector));
+
+    if (cosAngle < 0.0f) {
+        cosAngle = 0.0f;
+    }
+    if (cosAngle > 1.0f) {
+        cosAngle = 1.0f;
+    }
 
     return cosAngle;
 }
 
-uchar SceneColour::boundPixelValue(int shading)
+uchar Colour::boundPixelValue(int shading)
 {
     if (shading < 0) return 0;
     if (shading >= 255) return 255;
     return shading;
 }
 
-Vec3 SceneColour::calculateRGB(Vec3 ambient, Vec3 diffuse, float diffuseTerm)
+Vec3 Colour::calculateRGB(Vec3 ambient, Vec3 diffuse, float diffuseTerm)
 {
     float r = static_cast<float>(ambient[0] + diffuse[0] * diffuseTerm);
     int tempR = boundPixelValue(static_cast<int>(r));

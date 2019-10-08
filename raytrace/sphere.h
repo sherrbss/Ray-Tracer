@@ -2,6 +2,7 @@
 #define SPHERE_H
 
 #include "OpenGP/Image/Image.h"
+#include "ray.h"
 
 using namespace OpenGP;
 
@@ -26,7 +27,8 @@ public:
     // found is on the dark side of the sphere. If a solution
     // is found on the bright side of the circle, the greater of the
     //two solutions is returned.
-    float intersectRay(Vec3 const& direction, Vec3 const& origin);
+    //float intersectRay(Vec3 const& direction, Vec3 const& origin);
+    float intersectRay(Ray currRay);
 
 
 private:

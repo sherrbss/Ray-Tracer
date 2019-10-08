@@ -10,13 +10,16 @@ sphere::sphere(Vec3 sphereCenter, float sphereRadius)
 
 sphere::~sphere(){}
 
-float sphere::intersectRay(Vec3 const& direction, Vec3 const& origin)
+//float sphere::intersectRay(Vec3 const& direction, Vec3 const& origin)
+float sphere::intersectRay(Ray currRay)
 {
-    Vec3 ocVector = origin - mCenter_;
+    Vec3 originToSphereCenter = currRay.getOrigin() - mCenter_;
 
-    float A = direction.dot(direction);
-    float B = 2.0f * ocVector.dot(direction);
-    float C = ocVector.dot(ocVector) - mRadius_*mRadius_;
+    float A = currRay.getDirection().dot(currRay.getDirection());
+    float B = 2.0f * currRay.getDirection().dot(originToSphereCenter);
+    float C = originToSphereCenter.dot(originToSphereCenter) -
+            (mRadius_ * mRadius_);
+
     float discriminant = (B*B) - (4*A*C);
 
     float solA;
