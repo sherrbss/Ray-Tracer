@@ -23,16 +23,16 @@ int main(int, char**){
     float zOrigin = 0.0f;
 
     // Define viewing angle (-Z)
-    float zImage = -1.0f;
+    float zImage = -5.0f;
 
     // Intialize sphere position and dimensions
-    float sphereRadius = 3.0f;
+    float sphereRadius = 4.0f;
     float xSphereOffset = 0.0f;
-    float ySphereOffset = 0.0f;
+    float ySphereOffset = 3.0f;
     float zSphereDistance = -14.0f;
 
     // Define Anti-Aliasing factor
-    int aaFactor = 5;
+    int aaFactor = 10;
 
     // Add sphere onto the scene and define ambient/diffuse values
     Vec3 sphereCenter = Vec3(xSphereOffset, ySphereOffset, zSphereDistance);
@@ -59,7 +59,7 @@ int main(int, char**){
     sceneColour.updateColour(Vec3(220.0f, 220.0f, 220.0f));
 
     // Define lighting source
-    Vec3 lightingSource = Vec3(-5.0f, 10.0f, 0.0f);
+    Vec3 lightingSource = Vec3(-5.0f, 10.0f, 2.0f);
 
     // Define Image to write to bmp file
     Image<Vec3> imageWriter(hResolution, wResolution);
@@ -127,26 +127,22 @@ int main(int, char**){
 
                         } else {
 
-
-
                             // Add checkerboard shading
-                            int scale = 1111111;
-                            bool x = (int)((planePoint(0) + scale)) % 2 == 0;
-                            bool y = (int)((planePoint(1) + scale)) % 2 == 0;
-                            bool z = (int)((planePoint(2) + scale)) % 2 == 0;
+                            //Vec3 tempCol = planeColour.calculateCheckerboard(planePoint);
+                            //pixelColour.updateColour(tempCol);
 
-                            Vec3 tempCol;
-
-                            if (x ^ y ^ z) {
-                                tempCol = planeColour.white();
-                            } else {
-                                tempCol = planeColour.black();
-                            }
-
+                            // Add grey cloth-like material
+                            Vec3 tempCol = planeColour.calculateGreys();
                             pixelColour.updateColour(tempCol);
+
+                            // Add random RGB static material
+                            //Vec3 tempCol = planeColour.calculateRandom();
+                            //pixelColour.updateColour(tempCol);
                         }
 
                     } else {
+
+                        // Colour background and shade dependant upon solution
                         Vec3 currRayVector = currRay.getDirection().normalized();
                         float t = 0.5f * (currRayVector(1) + 1.0f);
                         Vec3 tempCol = ((1.0f - t) * sphereColour.white()) + (t * sceneColour.black());

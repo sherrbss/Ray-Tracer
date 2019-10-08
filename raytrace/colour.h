@@ -52,6 +52,15 @@ public:
     // Returns RGB of current pixel
     Vec3 calculateRGB(Vec3 ambient, Vec3 diffuse, float diffuseTerm);
 
+    // Returns RGB of checkerboard pattern
+    Vec3 calculateCheckerboard(Vec3 planePoint);
+
+    // Returns RGB of mixed greys
+    Vec3 calculateGreys();
+
+    // Returns RGB of random RGB coordinates
+    Vec3 calculateRandom();
+
 private:
     Vec3 currentColor, ambientColour, diffuseColour;
 };

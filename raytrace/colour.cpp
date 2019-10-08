@@ -94,4 +94,37 @@ Vec3 Colour::calculateRGB(Vec3 ambient, Vec3 diffuse, float diffuseTerm)
     return Vec3(tempR, tempB, tempG);
 }
 
+Vec3 Colour::calculateCheckerboard(Vec3 planePoint)
+{
+    int scale = 1111111;
+    bool x = static_cast<int>((planePoint(0) + scale)) % 2 == 0;
+    bool y = static_cast<int>((planePoint(1) + scale)) % 2 == 0;
+    bool z = static_cast<int>((planePoint(2) + scale)) % 2 == 0;
+
+    Vec3 tempCol;
+
+    if (x ^ y ^ z) {
+        return white();
+    } else {
+        return black();
+    }
+}
+
+Vec3 Colour::calculateGreys()
+{
+    // Generate random values between [50, 200]
+    float randX = static_cast<float>(rand() % 150) + 50;
+
+    return (randX * 0.5f) * Vec3(1.0f, 1.0f, 1.0f);
+}
+
+Vec3 Colour::calculateRandom()
+{
+    // Generate random values between [50, 200]
+    float randX = static_cast<float>(rand() % 150) + 50;
+    float randY = static_cast<float>(rand() % 150) + 50;
+    float randZ = static_cast<float>(rand() % 150) + 50;
+
+    return Vec3(1.0f * randX, 1.0f * randY, 1.0f * randZ);
+}
 

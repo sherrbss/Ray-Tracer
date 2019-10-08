@@ -17,15 +17,11 @@ camera::camera(Vec3 origin, Vec3 direction, float rows, float cols)
     Vec3 z = (origin - direction).normalized();
     Vec3 x = (upVector.cross(z)).normalized();
     Vec3 y = z.cross(x);
-    //Vec3 x = (origin - direction).normalized();
-    //Vec3 y = (upVector.cross(x)).normalized();
-    //Vec3 z = x.cross(y);
 
     // Generate x and y coordinates
     Vec3 tempX = width * x;
     Vec3 tempY = height * y;
     upperRight_ = origin + z + tempX + tempY;
-    lowerLeft_ = origin - x*width - y*height - z;
 
     // Adjust coordinates for larger [-1, 1] coordinate system
     horizontalDistance = 2.0f * tempX;
@@ -50,6 +46,3 @@ Ray camera::generateRay(float row, float col)
 
     return currRay;
 }
-
-
-
