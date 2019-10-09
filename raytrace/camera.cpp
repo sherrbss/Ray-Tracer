@@ -6,6 +6,7 @@ camera::camera(Vec3 origin, Vec3 direction, float rows, float cols)
 {
     // Assign generic up vector for the system
     Vec3 upVector = Vec3(0.0f, 1.0f, 0.0f);
+    Vec3 newUpVector;
 
     // Dimensions in proportionally scaled [0, 1] system
     rows_ = rows;
@@ -39,10 +40,22 @@ Ray camera::generateRay(float row, float col)
     // Calculate percentages of x and y coordinates
     float x = (col + randX) / cols_;
     float y = (row + randY) / rows_;
+    u = x;
+    v = y;
 
     // Calculate a new ray for the camera space and return
     Vec3 currDirection = (x * horizontalDistance) + (y * verticalDistance) - upperRight_ - origin_;
     Ray currRay = Ray(origin_, currDirection);
 
     return currRay;
+}
+
+float camera::getU()
+{
+    return u;
+}
+
+float camera::getV()
+{
+    return v;
 }

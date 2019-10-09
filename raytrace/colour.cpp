@@ -96,23 +96,25 @@ Vec3 Colour::calculateRGB(Vec3 ambient, Vec3 diffuse, float diffuseTerm)
 
 Vec3 Colour::calculateCheckerboard(Vec3 planePoint)
 {
-    int scale = 1111111;
-    bool x = static_cast<int>((planePoint(0) + scale)) % 2 == 0;
-    bool y = static_cast<int>((planePoint(1) + scale)) % 2 == 0;
-    bool z = static_cast<int>((planePoint(2) + scale)) % 2 == 0;
+    // Find odd and even area's and scale to remove noise.
+    // NOTE: Smaller distances from origin can use "% 2 == 0"
+    int scale = 9999999;
+    bool x = static_cast<int>((planePoint(0) + scale)) % 20 >= 10;
+    bool y = static_cast<int>((planePoint(1) + scale)) % 20 >= 10;
+    bool z = static_cast<int>((planePoint(2) + scale)) % 20 >= 10;
 
     Vec3 tempCol;
 
     if (x ^ y ^ z) {
         return white();
     } else {
-        return black();
+        return grey();
     }
 }
 
 Vec3 Colour::calculateGreys()
 {
-    // Generate random values between [50, 200]
+    // Generate random value between [50, 200]
     float randX = static_cast<float>(rand() % 150) + 50;
 
     return (randX * 0.5f) * Vec3(1.0f, 1.0f, 1.0f);

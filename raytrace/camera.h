@@ -22,9 +22,15 @@ public:
     // position is passed in as an argument of type Vec3.
     Ray generateRay(float x, float y);
 
+    //
+    float getU();
+
+    //
+    float getV();
+
 private:
     Vec3 origin_;
-    float rows_, cols_;
+    float rows_, cols_, u, v;
     Vec3 upperRight_, lowerLeft_, horizontalDistance, verticalDistance;
 };
 

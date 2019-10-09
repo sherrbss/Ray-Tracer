@@ -1,9 +1,8 @@
 #include "OpenGP/Image/Image.h"
+#include "OpenGP/external/LodePNG/lodepng.h"
 #include "bmpwrite.h"
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <sstream>
 #include "camera.h"
 #include "sphere.h"
 #include "colour.h"
@@ -22,17 +21,19 @@ int main(int, char**){
     float yOrigin = 0.0f;
     float zOrigin = 0.0f;
 
-    // Define viewing angle (-Z)
-    float zImage = -5.0f;
-
     // Intialize sphere position and dimensions
-    float sphereRadius = 4.0f;
+    float sphereRadius = 20.0f;
     float xSphereOffset = 0.0f;
-    float ySphereOffset = 3.0f;
-    float zSphereDistance = -14.0f;
+    float ySphereOffset = 0.0f;
+    float zSphereDistance = -55.0f;
+
+    // Define viewing angle
+    float xDirection = 0.0f;
+    float yDirection = 0.0f;
+    float zDirection = -2.0f;
 
     // Define Anti-Aliasing factor
-    int aaFactor = 10;
+    int aaFactor = 1;
 
     // Add sphere onto the scene and define ambient/diffuse values
     Vec3 sphereCenter = Vec3(xSphereOffset, ySphereOffset, zSphereDistance);
@@ -41,9 +42,9 @@ int main(int, char**){
     sphereColour.setAmbient(Vec3(7.0f, 70.0f, 70.0f));
     sphereColour.setDiffuse(Vec3(15.0f, 130.0f, 130.0f));
 
-    // Define camera origin
+    // Define camera origin and viewing direction
     Vec3 origin = Vec3(xOrigin, yOrigin, zOrigin);
-    Vec3 originViewDirection = Vec3(0.0f, 0.0f, zImage);
+    Vec3 originViewDirection = Vec3(xDirection, yDirection, zDirection);
     camera cam = camera(origin, originViewDirection, hResolution, wResolution);
 
     // Add sphere onto the scene and define ambient/diffuse values
@@ -58,8 +59,8 @@ int main(int, char**){
     sceneColour.setDiffuse(Vec3(255.0f, 255.0f, 255.0f));
     sceneColour.updateColour(Vec3(220.0f, 220.0f, 220.0f));
 
-    // Define lighting source
-    Vec3 lightingSource = Vec3(-5.0f, 10.0f, 2.0f);
+    // Define lighting source (-Z)
+    Vec3 lightingSource = Vec3(-50.0f, 200.0f, 55.0f);
 
     // Define Image to write to bmp file
     Image<Vec3> imageWriter(hResolution, wResolution);
@@ -83,7 +84,7 @@ int main(int, char**){
                 if (t > 0.0f) {
 
                     // Define rays for diffuse calculation
-                    Vec3 spherePoint = currRay.getPoint(t);
+                    Vec3 spherePoint = (currRay.getPoint(t));
                     Ray sphereNormal = Ray(sphereCenter, spherePoint);
                     Ray lightRay = Ray(lightingSource, spherePoint);
 
@@ -103,8 +104,8 @@ int main(int, char**){
                     // Calculate ray-plane intersection (floor)
                     float t = -(origin(1) + sphereRadius) / ray(1);
                     Vec3 planePoint = currRay.getPoint(t);
-                    if (t > 0.0f && planePoint(0) < 15.0f && planePoint(0) > -15.0f
-                            && planePoint(2) < -8.0f && planePoint(2) > -20.0f) {
+                    if (t > 0.0f && planePoint(0) < 700.0f && planePoint(0) > -700.0f
+                            && planePoint(2) < 0.0f && planePoint(2) > -150.0f) {
 
                         // Generate ray and test for intersection with sphere
                         Ray normal = Ray(Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 0.0f));
@@ -128,16 +129,15 @@ int main(int, char**){
                         } else {
 
                             // Add checkerboard shading
-                            //Vec3 tempCol = planeColour.calculateCheckerboard(planePoint);
-                            //pixelColour.updateColour(tempCol);
+                            Vec3 tempCol = planeColour.calculateCheckerboard(planePoint);
 
                             // Add grey cloth-like material
-                            Vec3 tempCol = planeColour.calculateGreys();
-                            pixelColour.updateColour(tempCol);
+                            //Vec3 tempCol = planeColour.calculateGreys();
 
                             // Add random RGB static material
                             //Vec3 tempCol = planeColour.calculateRandom();
-                            //pixelColour.updateColour(tempCol);
+
+                            pixelColour.updateColour(tempCol);
                         }
 
                     } else {
@@ -145,7 +145,7 @@ int main(int, char**){
                         // Colour background and shade dependant upon solution
                         Vec3 currRayVector = currRay.getDirection().normalized();
                         float t = 0.5f * (currRayVector(1) + 1.0f);
-                        Vec3 tempCol = ((1.0f - t) * sphereColour.white()) + (t * sceneColour.black());
+                        Vec3 tempCol = ((1.0f - t) * sphereColour.black()) + ((t) * sceneColour.white());
                         pixelColour.updateColour(Vec3(tempCol));
                     }
                 }
